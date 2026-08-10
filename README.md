@@ -30,9 +30,7 @@ grupo4-ansible-guia/
 ├── docs/
 │ ├── divisao-tarefas.md
 │ └── secoes/ uma seção por membro
-├── exemplos/ playbooks de exemplo
-└── slides/ apresentação
-
+└── exemplos/ playbooks de exemplo
 
 ## Divisão de tarefas
 
