@@ -1,0 +1,16 @@
+---
+# 03-playbook-nginx.yml
+# Responsável: PREENCHER SEU NOME
+# Descrição: Instalação e configuração de serviço web
+#
+# Execução:
+#   ansible-playbook -i ../inventario/hosts.ini 03-playbook-nginx.yml
+
+- name: PREENCHER
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: PREENCHER
+      ansible.builtin.debug:
+        msg: "substituir por tasks reais"

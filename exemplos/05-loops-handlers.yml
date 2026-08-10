@@ -1,0 +1,16 @@
+---
+# 05-loops-handlers.yml
+# Responsável: PREENCHER SEU NOME
+# Descrição: Loops, condicionais, handlers e tags
+#
+# Execução:
+#   ansible-playbook -i ../inventario/hosts.ini 05-loops-handlers.yml
+
+- name: PREENCHER
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: PREENCHER
+      ansible.builtin.debug:
+        msg: "substituir por tasks reais"
