@@ -1,16 +1,70 @@
 ---
 # 03-playbook-nginx.yml
-# Responsável: PREENCHER SEU NOME
+# Responsável: Filipe Sousa
 # Descrição: Instalação e configuração de serviço web
 #
 # Execução:
-#   ansible-playbook -i ../inventario/hosts.ini 03-playbook-nginx.yml
+#   ansible-playbook -i inventario/hosts.ini 03-playbook-nginx.yml
 
-- name: PREENCHER
-  hosts: all
-  become: yes
+- name: Instalar e configurar um servidor web nginx
+  hosts: local
+  become: true
+
+  vars:
+    pacote_web: nginx
+    porta_web: 80
+    diretorio_web: /var/www/html
 
   tasks:
-    - name: PREENCHER
+    - name: Atualizar o cache de pacotes do APT
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: Garantir que o nginx esteja instalado
+      ansible.builtin.apt:
+        name: "{{ pacote_web }}"
+        state: present
+
+    - name: Publicar pagina inicial personalizada
+      ansible.builtin.copy:
+        dest: "{{ diretorio_web }}/index.html"
+        owner: root
+        group: root
+        mode: "0644"
+        content: |
+          <!DOCTYPE html>
+          <html lang="pt-br">
+          <head>
+            <meta charset="utf-8">
+            <title>Grupo 4 - Ansible</title>
+          </head>
+          <body>
+            <h1>Provisionado com Ansible</h1>
+            <p>Grupo 4 - Trilha DevOps - Aponti FAP 2026</p>
+          </body>
+          </html>
+      notify: Recarregar nginx
+
+    - name: Garantir que o serviço nginx esteja iniciado
+      ansible.builtin.service:
+        name: "{{ pacote_web }}"
+        state: started
+        enabled: true
+
+    - name: Validar a resposta HTML do servidor
+      ansible.builtin.uri:
+        url: "http://localhost:{{ porta_web }}"
+        status_code: 200
+      register: resposta_http
+      become: false
+
+    - name: Exibir o resultado da validacao
       ansible.builtin.debug:
-        msg: "substituir por tasks reais"
+        msg: "nginx respondeu com HTTP {{ resposta_http.status }}"
+
+  handlers:
+    - name: Recarregar nginx
+      ansible.builtin.service:
+        name: "{{ pacote_web }}"
+        state: reloaded
