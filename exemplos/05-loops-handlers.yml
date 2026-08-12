@@ -1,16 +1,75 @@
 ---
 # 05-loops-handlers.yml
-# Responsável: PREENCHER SEU NOME
-# Descrição: Loops, condicionais, handlers e tags
-#
+# Responsável: Lucas Emmanoel
+# Descrição: Exemplo prático de loops, condicionais, handlers e tags
 # Execução:
-#   ansible-playbook -i ../inventario/hosts.ini 05-loops-handlers.yml
+#   ansible-playbook -i ../inventario/hosts.ini exemplos/05-loops-handlers.yml
 
-- name: PREENCHER
+- name: Exemplo: Loops, Handlers e Tags
   hosts: all
-  become: yes
+  become: true
 
   tasks:
-    - name: PREENCHER
-      ansible.builtin.debug:
-        msg: "substituir por tasks reais"
+
+    # ==========================================
+    # EXEMPLO 1 - LOOP
+    # ==========================================
+    - name: Instalar pacotes necessários
+      ansible.builtin.apt:
+        name: "{{ item }}"
+        state: present
+        update_cache: true
+      loop:
+        - nginx
+        - git
+        - curl
+        - vim
+      tags:
+        - pacotes
+        - loop
+        
+    # ==========================================
+    # EXEMPLO 2 - HANDLER
+    # ==========================================
+    # Task que o acionará o handler
+    - name: Alterar configuração do Nginx
+      ansible.builtin.copy:
+        content: |
+          server {
+              listen 80;
+              server_name localhost;
+
+              location / {
+                  return 200 "Servidor configurado pelo Ansible!\n";
+              }
+          }
+        dest: /etc/nginx/sites-available/default
+        owner: root
+        group: root
+        mode: '0644'
+      notify:
+        - Reiniciar Nginx
+      tags:
+        - nginx
+        - configuracao
+
+    # ==========================================
+    # EXEMPLO 3 - TAG
+    # ==========================================
+    - name: Criar arquivo de teste
+      ansible.builtin.file:
+        path: /tmp/ansible-teste.txt
+        state: touch
+        mode: '0644'
+      tags:
+        - teste
+  
+  # ==========================================
+  # HANDLERS
+  # ==========================================
+  handlers:
+
+    - name: Reiniciar Nginx
+      ansible.builtin.service:
+        name: nginx
+        state: restarted
