@@ -1,16 +1,30 @@
 ---
 # 02-inventario-adhoc.yml
-# Responsável: PREENCHER SEU NOME
-# Descrição: Demonstração de inventário e comandos ad-hoc
+# Descrição: testa os hosts do inventário e exibe informações de cada alvo
 #
-# Execução:
-#   ansible-playbook -i ../inventario/hosts.ini 02-inventario-adhoc.yml
+# Validação:
+#   ansible-playbook --syntax-check -i inventario/hosts.ini exemplos/02-inventario-adhoc.yml
+#
+# Execução a partir da raiz do repositório:
+#   ansible-playbook -i inventario/hosts.ini exemplos/02-inventario-adhoc.yml
 
-- name: PREENCHER
+- name: Demonstrar o uso do inventário
   hosts: all
-  become: yes
+  gather_facts: false
 
   tasks:
-    - name: PREENCHER
+    - name: Testar a comunicação com os hosts
+      ansible.builtin.ping:
+
+    - name: Consultar o nome da máquina
+      ansible.builtin.command: hostname
+      register: resultado_hostname
+      changed_when: false
+
+    - name: Exibir informações do host no inventário
       ansible.builtin.debug:
-        msg: "substituir por tasks reais"
+        msg:
+          - "Nome no inventário: {{ inventory_hostname }}"
+          - "Grupos: {{ group_names | join(', ') }}"
+          - "Nome da máquina: {{ resultado_hostname.stdout }}"
+          - "Conexão: {{ ansible_connection | default('ssh') }}"
