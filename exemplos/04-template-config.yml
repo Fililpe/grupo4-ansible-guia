@@ -1,16 +1,46 @@
 ---
 # 04-template-config.yml
-# Responsável: PREENCHER SEU NOME
-# Descrição: Renderização de config via template Jinja2
+# Responsável: Miqueias Eduardo
+# Descrição: Exemplo de utilização de variáveis, facts e templates Jinja2
 #
 # Execução:
-#   ansible-playbook -i ../inventario/hosts.ini 04-template-config.yml
+# ansible-playbook -i ../inventario/hosts.ini exemplos/04-template-config.yml
 
-- name: PREENCHER
-  hosts: all
-  become: yes
+- name: Exemplo de Variáveis, Facts e Templates Jinja2
+  hosts: webserver
+  gather_facts: true
+
+  vars:
+    usuario: admin
+    ambiente: producao
 
   tasks:
-    - name: PREENCHER
-      ansible.builtin.debug:
-        msg: "substituir por tasks reais"
+
+    # ==========================================
+    # EXEMPLO 1 - VARIÁVEL
+    # ==========================================
+    - name: Exibir variável definida pelo usuário
+      debug:
+        msg: "Usuário: {{ usuario }}"
+
+    # ==========================================
+    # EXEMPLO 2 - FACTS
+    # ==========================================
+    - name: Exibir facts coletados pelo Ansible
+      debug:
+        msg: "Hostname: {{ ansible_hostname }} | Sistema: {{ ansible_distribution }}"
+
+    # ==========================================
+    # EXEMPLO 3 - TEMPLATE JINJA2
+    # ==========================================
+    - name: Gerar arquivo de configuração usando template Jinja2
+      template:
+        src: config.j2
+        dest: /tmp/config.txt
+
+    # ==========================================
+    # EXEMPLO 4 - TEMPLATE JINJA2 EXECUTADO
+    # ==========================================
+    - name: Exemplo de template Jinja2
+      debug:
+        msg: "Servidor {{ ansible_hostname }} executando {{ ansible_distribution }} no ambiente de {{ ambiente }}"
