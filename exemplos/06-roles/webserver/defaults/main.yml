@@ -1,1 +1,4 @@
 ---
+nginx_package: nginx
+nginx_service: nginx
+site_title: "Servidor Web - Ansible Role"

@@ -1,1 +1,19 @@
 ---
+- name: Instalar Nginx
+  ansible.builtin.apt:
+    name: "{{ nginx_package }}"
+    state: present
+    update_cache: true
+
+- name: Garantir que o Nginx esteja em execução
+  ansible.builtin.service:
+    name: "{{ nginx_service }}"
+    state: started
+    enabled: true
+
+- name: Criar página inicial
+  ansible.builtin.template:
+    src: index.html.j2
+    dest: "{{ webserver_document_root }}/index.html"
+    mode: "0644"
+  notify: Reiniciar Nginx

@@ -1,1 +1,2 @@
 ---
+webserver_document_root: /var/www/html
