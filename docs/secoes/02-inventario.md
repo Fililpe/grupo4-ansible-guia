@@ -1,5 +1,5 @@
 # Inventário e Comandos Ad-hoc
-
+**Responsável:** André Costa
 **Arquivo de exemplo:** `exemplos/02-inventario-adhoc.yml`
 
 O inventário informa ao Ansible quais máquinas serão gerenciadas, como elas são
