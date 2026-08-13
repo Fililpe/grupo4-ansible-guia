@@ -1,16 +1,104 @@
 ---
 # 07-vault-hardening.yml
-# Responsável: PREENCHER SEU NOME
-# Descrição: Secrets com Ansible Vault e hardening de SSH
+# Responsável: SEU NOME
+# Descrição: demonstra o uso de um segredo protegido com Ansible Vault
+# e aplica um hardening de SSH em um arquivo de DEMONSTRAÇÃO dentro de /tmp.
 #
-# Execução:
-#   ansible-playbook -i ../inventario/hosts.ini 07-vault-hardening.yml
+# Execução sem Vault:
+# ansible-playbook -i inventario/hosts.ini exemplos/07-vault-hardening.yml
+#
+# Execução com Vault:
+# ansible-playbook -i inventario/hosts.ini exemplos/07-vault-hardening.yml \
+#   -e @/tmp/vault-demo.yml --ask-vault-pass
 
-- name: PREENCHER
-  hosts: all
-  become: yes
+- name: Demonstrar Ansible Vault e hardening com segurança
+  hosts: local
+  gather_facts: false
+
+  vars:
+    demo_dir: /tmp/ansible-vault-hardening
+    ssh_config_demo: "{{ demo_dir }}/sshd_config"
+    secret_file_demo: "{{ demo_dir }}/app.secret"
 
   tasks:
-    - name: PREENCHER
+    - name: Criar diretório de demonstração com acesso restrito
+      ansible.builtin.file:
+        path: "{{ demo_dir }}"
+        state: directory
+        mode: "0700"
+      tags:
+        - hardening
+
+    - name: Criar configuração SSH endurecida de demonstração
+      ansible.builtin.copy:
+        dest: "{{ ssh_config_demo }}"
+        mode: "0600"
+        content: |
+          # Arquivo de demonstração criado pelo Ansible.
+          # NÃO substitui automaticamente /etc/ssh/sshd_config.
+          PermitRootLogin no
+          PasswordAuthentication no
+          PubkeyAuthentication yes
+          MaxAuthTries 3
+          X11Forwarding no
+          PermitEmptyPasswords no
+      notify: Validar configuracao SSH de demonstracao
+      tags:
+        - hardening
+
+    - name: Salvar segredo carregado pelo Vault em arquivo protegido
+      ansible.builtin.copy:
+        dest: "{{ secret_file_demo }}"
+        content: "{{ vault_demo_secret }}\n"
+        mode: "0600"
+      when: vault_demo_secret is defined
+      no_log: true
+      tags:
+        - vault
+
+    - name: Informar status do segredo sem exibir seu valor
       ansible.builtin.debug:
-        msg: "substituir por tasks reais"
+        msg: >-
+          {{
+            'Segredo protegido pelo Vault foi carregado com sucesso.'
+            if vault_demo_secret is defined
+            else 'Nenhum segredo Vault foi carregado; a parte de hardening continua funcionando.'
+          }}
+      tags:
+        - vault
+
+    - name: Coletar informações do arquivo de hardening
+      ansible.builtin.stat:
+        path: "{{ ssh_config_demo }}"
+      register: ssh_demo_stat
+      tags:
+        - verificacao
+
+    - name: Validar permissões do arquivo de hardening
+      ansible.builtin.assert:
+        that:
+          - ssh_demo_stat.stat.exists
+          - ssh_demo_stat.stat.mode == '0600'
+        success_msg: "Arquivo de hardening criado com permissão 0600."
+        fail_msg: "O arquivo de hardening não está com a permissão esperada."
+      tags:
+        - verificacao
+
+    - name: Mostrar onde os arquivos de demonstração foram criados
+      ansible.builtin.debug:
+        msg:
+          - "Configuração SSH de demonstração: {{ ssh_config_demo }}"
+          - "Diretório protegido: {{ demo_dir }}"
+          - "O playbook não altera o SSH real da máquina."
+      tags:
+        - verificacao
+
+  handlers:
+    - name: Validar configuracao SSH de demonstracao
+      ansible.builtin.command:
+        argv:
+          - grep
+          - -E
+          - "^(PermitRootLogin no|PasswordAuthentication no|PubkeyAuthentication yes)$"
+          - "{{ ssh_config_demo }}"
+      changed_when: false
