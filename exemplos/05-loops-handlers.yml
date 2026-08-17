@@ -5,7 +5,7 @@
 # Execução:
 #   ansible-playbook -i ../inventario/hosts.ini exemplos/05-loops-handlers.yml
 
-- name: Exemplo: Loops, Handlers e Tags
+- name: Exemplo de Loops, Handlers e Tags
   hosts: all
   become: true
 
